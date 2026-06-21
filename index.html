@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DC / EVPN / Silicon — Juniper Cheatsheet</title>
+<style>
+  :root{--bg:#fbfbfd;--card:#fff;--ink:#15171c;--mut:#5b6270;--line:#e3e6ec;--acc:#0a5;--blue:#1666c8;--red:#c2362f;--chip:#eef2f8;}
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%}
+  body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:10px 14px;z-index:9}
+  header h1{font-size:15px;margin:0 0 6px}
+  nav{display:flex;flex-wrap:wrap;gap:6px}
+  nav a{font-size:12px;text-decoration:none;color:var(--blue);background:var(--chip);padding:4px 8px;border-radius:6px;white-space:nowrap}
+  main{padding:14px;max-width:820px;margin:0 auto}
+  section{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:0 0 16px}
+  h2{font-size:18px;margin:0 0 10px;padding-bottom:6px;border-bottom:2px solid var(--acc)}
+  h3{font-size:14px;margin:16px 0 6px;color:var(--mut);text-transform:uppercase;letter-spacing:.04em}
+  p{margin:6px 0}
+  .tbl{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:8px -4px}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:540px}
+  th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+  th{background:#f3f5f9;font-weight:600}
+  b{color:var(--ink)}
+  .k{color:var(--blue);font-weight:700}
+  .r{color:var(--red);font-weight:700}
+  .g{color:var(--acc);font-weight:700}
+  .hook{background:#fff7e6;border-left:3px solid #e0a008;padding:8px 10px;border-radius:0 6px 6px 0;margin:8px 0;font-size:14px}
+  .room{background:#eef6ee;border-left:3px solid var(--acc);padding:8px 10px;border-radius:0 6px 6px 0;margin:8px 0;font-size:14px}
+  ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
+  code{background:var(--chip);padding:1px 5px;border-radius:4px;font-size:13px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  @media(max-width:520px){.grid2{grid-template-columns:1fr}}
+  .small{font-size:12px;color:var(--mut)}
+  footer{text-align:center;color:var(--mut);font-size:12px;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>DC / EVPN / Silicon — Juniper prep</h1>
+  <nav>
+    <a href="#sil">Silicon map</a>
+    <a href="#evo">Card evolution</a>
+    <a href="#flow">Packet flow</a>
+    <a href="#evpn">EVPN/VXLAN</a>
+    <a href="#ai">AI fabric</a>
+    <a href="#sell">Pre-sales</a>
+  </nav>
+</header>
+<main>
+
+<section id="sil">
+  <h2>1 &middot; Silicon / chassis / line-card</h2>
+  <div class="tbl">
+  <table>
+    <tr><th>Role / buffer</th><th>Broadcom</th><th>Arista</th><th>Cisco</th><th>Juniper</th><th>Nokia</th></tr>
+    <tr><td><b>Deep</b><br>VOQ+HBM<br>DCI / AI scale</td><td>Jericho 2/3/4</td><td><span class="k">7280R / 7500R / 7800R</span></td><td>NCS 5500/5700 (Jericho); 8000 = Silicon One</td><td><span class="k">QFX10000 = Q5</span>; PTX = Express; MX = Trio</td><td>7250 IXR (Jericho); 7750 SR = FP5</td></tr>
+    <tr><td><b>Shallow</b><br>on-chip<br>leaf / spine</td><td>Trident / Tomahawk</td><td>7050X / 7060X (+7300 chassis)</td><td>Nexus 9300/9500 = Cloud Scale</td><td>QFX5xxx</td><td>7220 IXR</td></tr>
+    <tr><td><b>L1</b><br>ultra-low-latency</td><td>&mdash;</td><td>7130 (Metamako)</td><td>Nexus 3550 (Exablaze)</td><td>&mdash;</td><td>&mdash;</td></tr>
+    <tr><td><b>In-house?</b></td><td><i>merchant</i></td><td><span class="r">none &mdash; all Broadcom</span></td><td>Cloud Scale + Silicon One (+ buys Jericho)</td><td><span class="g">Q5 / Express / Trio</span></td><td>FP5 (deep only)</td></tr>
+  </table>
+  </div>
+  <h3>Broadcom families</h3>
+  <ul>
+    <li><b>Trident</b> = feature leaf (VXLAN, telemetry), shallow</li>
+    <li><b>Tomahawk</b> = spine / low-latency / AI leaf, shallow, high-radix (TH6 = 102.4T)</li>
+    <li><b>Jericho</b> = deep buffer, DCI, AI scale-out (VOQ + cells + <b>Ramon</b> fabric chip)</li>
+  </ul>
+  <h3>Mnemonics</h3>
+  <div class="hook">
+    <b>Arista "R" = deep/Jericho</b> &rarr; 7280R / 7500R / 7800R (28-50-80). No "R" = shallow.<br>
+    <b>Juniper by where it lives:</b> <span class="k">QFX = DC</span> &middot; <span class="k">PTX = core</span> &middot; <span class="k">MX = edge</span>. Deep DC = QFX10000 = Q5.<br>
+    <b>In-house lives only where the money is</b> (deep/routing/AI). Shallow leaf = Broadcom commodity. Only Cisco bothers with in-house shallow (Cloud Scale).<br>
+    <b>Cisco runs 3 silicons:</b> Cloud Scale (shallow, own) + Silicon One (deep, own) + Broadcom Jericho (NCS).
+  </div>
+  <p class="small">Deep in a low-latency leaf &rarr; cell+credit+HBM tax kills latency. Shallow in DCI/incast &rarr; can't absorb burst: 50ms&times;100G &asymp; 625MB needed vs ~165MB on-chip &rarr; tail-drop.</p>
+</section>
+
+<section id="evo">
+  <h2>2 &middot; Card / silicon evolution</h2>
+  <div class="hook"><b>The law:</b> each generation <b>~doubles bandwidth</b>, driven by <b>SerDes speed doubling</b> &mdash; <u>per-lane speed</u>, not more lanes. <code>NRZ = 1 bit/symbol &rarr; PAM4 = 2 bits/symbol</code> + higher baud. Ladder: <span class="k">25G &rarr; 50G &rarr; 100G &rarr; 200G per lane</span>. "Which line card" = which silicon gen + port config.</div>
+  <div class="grid2">
+    <div><h3>Tomahawk (shallow)</h3>TH3 &rarr; TH4 25.6T &rarr; TH5 51.2T &rarr; <b>TH6 102.4T</b><br><span class="small">radix / bandwidth race</span></div>
+    <div><h3>Jericho (deep)</h3>J2 &rarr; J2c+ &rarr; J3-AI &rarr; <b>J4 ~51.2T</b><br><span class="small">J3-AI = perfect-LB/congestion-free for GPU; J4 = scale across DCs</span></div>
+  </div>
+  <h3>Trident (feature leaf)</h3>
+  <p>Trident2 &rarr; 3 &rarr; 4 &rarr; 5 &mdash; spends on programmability / VXLAN / telemetry, not raw Tbps.</p>
+  <h3>Glossary</h3>
+  <ul>
+    <li><b>SerDes</b> = serializer/deserializer; turns parallel bits into a serial stream on a lane. Port = several lanes.</li>
+    <li><b>radix</b> = ports one chip fans out. High-radix &rarr; fewer Clos tiers.</li>
+    <li><b>HBM</b> = stacked DRAM beside the chip = where the deep buffer lives (off-die).</li>
+    <li><b>VOQ</b> = per-egress queues held at <b>ingress</b> &rarr; kills head-of-line blocking.</li>
+    <li><b>cells</b> = deep chip chops packet into fixed cells, sprays across fabric, reassembles at egress.</li>
+    <li><b>Ramon</b> = Broadcom fabric chip; Jericho = ports, Ramon = switch between them = scalable chassis.</li>
+  </ul>
+</section>
+
+<section id="flow">
+  <h2>3 &middot; Packet flow &mdash; two flows, not three</h2>
+  <p><b>Forwarding logic is identical</b> (parse &rarr; lookup &rarr; forward). <b>Buffering differs.</b></p>
+  <h3 class="k">Shallow (Tomahawk / Trident) = output-queued shared-memory</h3>
+  <p>wire &rarr; ingress &rarr; parse+lookup (ACLs here) &rarr; <b>store ONCE in on-chip shared buffer</b> &rarr; enqueue pointer to <b>EGRESS</b> queue &rarr; scheduler &rarr; wire.<br>
+  <span class="r">No cells. No VOQ. No fabric.</span> Single die, lowest latency, cut-through, microburst-limited. Buffer at <b>egress</b>.</p>
+  <h3 class="k">Deep (Jericho / Q5) = ingress-VOQ + cell fabric</h3>
+  <p>wire &rarr; ingress &rarr; parse+lookup &rarr; <b>segment into cells</b> &rarr; <b>INGRESS VOQ</b> (deep HBM) &rarr; egress scheduler <b>credit/grant</b> &rarr; <b>spray cells across fabric</b> &rarr; <b>egress reassembles</b> &rarr; wire.<br>
+  No HOL, deep, scales across a modular chassis. ~&micro;s latency. Buffer at <b>ingress</b>.</p>
+  <div class="hook"><b>Why fabric exists:</b> a deep box is a <b>modular chassis</b> = many line cards/chips; the fabric (+cells) connects them. A shallow box is a <b>single die</b> &mdash; nothing to cross, so no fabric. <i>Fabric = multiple chips to interconnect.</i> (Distinction is architecture, not box size: Nexus 9500 is a shallow chassis.)</div>
+  <div class="room"><b>QoS vs architectural latency:</b> a strict-priority queue fixes <b>queuing</b> latency (voice doesn't wait behind bulk &mdash; SP edge does this on deep boxes daily). It CANNOT fix the <b>architectural floor</b> every packet pays on a VOQ box: cell seg/reassembly + credit grant + off-chip HBM (+ jitter). So deep+QoS = fine for ms-tolerant voice; <b>fails for ns/deterministic HFT/RoCE</b> &rarr; those need shallow cut-through (tens of ns) or L1 (~5ns).</div>
+</section>
+
+<section id="evpn">
+  <h2>4 &middot; EVPN / VXLAN</h2>
+  <h3>The 2&times;2 &mdash; the data-plane spine</h3>
+  <div class="tbl">
+  <table>
+    <tr><th></th><th>Learn it (route type, control plane)</th><th>Carry it (VNI in packet, data plane)</th></tr>
+    <tr><th>Bridge (same subnet)</th><td><span class="k">Type-2</span> (MAC+IP)</td><td><span class="k">L2VNI</span></td></tr>
+    <tr><th>Route (diff subnet)</th><td><span class="k">Type-5</span> (IP prefix)</td><td><span class="k">L3VNI</span></td></tr>
+  </table>
+  </div>
+  <div class="room"><b>MPLS L3VPN map (you know this cold):</b> <span class="k">Type-5 = VPNv4 route</span> (how leaf learns) &middot; <span class="k">L3VNI = VPN label</span> (in the packet) &middot; <span class="k">egress leaf = egress PE</span>. Same machine, VXLAN wrapper instead of label stack. "Symmetric IRB" = both ends route (route-in &rarr; L3VNI &rarr; route-out).</div>
+  <h3>Unicast walk A&rarr;B (same subnet)</h3>
+  <ol>
+    <li><b>Type-2</b> pre-loaded B's MAC+IP to every leaf via BGP.</li>
+    <li>A ARPs &rarr; local leaf answers from its table = <b>ARP suppression</b> (never floods). The "IP" in Type-2 is what enables this.</li>
+    <li>Ingress leaf encaps: inner frame + <b>VNI</b> + outer IP (src leaf loopback &rarr; dst leaf loopback).</li>
+    <li><b>Spine sees outer IP only</b> &mdash; blind to tenant MAC/VNI. Picks ONE spine via ECMP.</li>
+    <li>Egress leaf reads VNI &rarr; decaps &rarr; delivers.</li>
+  </ol>
+  <h3>BUM (broadcast/unknown/multicast)</h3>
+  <p><b>Type-3</b> (IMET) = the per-VNI flood list (who). <b>Ingress replication</b> = the how (leaf unicasts one copy to each leaf on the list; no multicast underlay needed = DC default). What's left after ARP suppression: real broadcast (DHCP) + multicast, not unknown-unicast.</p>
+  <h3>Multihoming &mdash; ESI-LAG (= vPC, standards-based)</h3>
+  <div class="tbl">
+  <table>
+    <tr><th>Mechanism</th><th>Route</th><th>Prevents</th></tr>
+    <tr><td><b>DF election</b></td><td>Type-4</td><td>duplicate BUM to host (one forwarder)</td></tr>
+    <tr><td><b>Aliasing</b></td><td>Type-1 / EVI</td><td>idle link (both uplinks used)</td></tr>
+    <tr><td><b>Mass-withdraw</b></td><td>Type-1 / ES</td><td>slow failover (one withdraw clears all MACs)</td></tr>
+  </table>
+  </div>
+  <p class="small">Say "<b>DF election</b>", not "broadcast suppression" (that's ARP suppression, a different thing).</p>
+  <h3>Underlay / overlay</h3>
+  <p>Underlay = IP reachability for VTEP loopbacks + ECMP. OSPF/IS-IS, or <b>eBGP (RFC 7938)</b> at hyperscale (per-leaf ASN, shared spine ASN, blast-radius contained). Overlay = BGP EVPN (spines = route reflectors). VXLAN needs <b>jumbo MTU 9216</b> (~50B overhead) or silent blackhole.</p>
+</section>
+
+<section id="ai">
+  <h2>5 &middot; AI / GPU fabric</h2>
+  <h3>Scale-up vs scale-out</h3>
+  <p><b>Scale-up</b> = inside a node, GPUs glued by <b>NVLink/NVSwitch</b> (NVIDIA), ~TB/s. <b>Scale-out</b> = the network between nodes = what's sold: <span class="k">Ethernet (Juniper/Broadcom/Spectrum-X + UEC) vs InfiniBand (NVIDIA Quantum)</span>.</p>
+  <h3>Why ECMP breaks for all-reduce</h3>
+  <p>All-reduce = a few huge <b>elephant</b> flows. ECMP hashes <b>per-flow</b> &rarr; pins each to one path &rarr; elephants collide while links idle. Barrier-synced &rarr; slowest path stalls every GPU.</p>
+  <div class="room"><b>Fix = packet spraying / adaptive routing</b> (spread one flow across all paths: Broadcom DLB, Spectrum-X adaptive, UEC). Safe ONLY on <b>lossless + reorder-tolerant</b>: <span class="k">RoCEv2 over PFC + ECN + DCQCN</span>. NIC reassembles; fabric must not drop. Plain TCP = disaster.</div>
+  <h3>Non-Clos topologies (sold into AI/HPC)</h3>
+  <ul>
+    <li><b>Rail-optimized Clos</b> &mdash; each GPU NIC on its own rail/leaf; same-rank GPUs = 1 hop (NVIDIA default).</li>
+    <li><b>Dragonfly</b> &mdash; groups fully meshed by global links; cuts optics; needs adaptive routing (HPE Slingshot).</li>
+    <li><b>Torus</b> &mdash; wrap-around grid, no spine; cheap, multi-hop (Google TPU).</li>
+    <li><b>OCS</b> &mdash; optical circuit switch rewires topology per job (Google Jupiter).</li>
+  </ul>
+  <p class="small">Every non-Clos topology kills simple ECMP &rarr; all need adaptive routing + lossless. <b>UEC</b> = the open standard replacing per-flow ECMP + IB lock-in.</p>
+</section>
+
+<section id="sell">
+  <h2>6 &middot; Pre-sales positioning</h2>
+  <div class="room"><b>"Same TH6 as Arista &mdash; why Juniper?"</b><br>"I'm not selling you the chip &mdash; the silicon's identical. I'm selling the fabric that's cheapest to <b>run</b> at scale: <b>Apstra</b> automation (fewer engineers, fewer outages), <b>open Ethernet / UEC</b> (no lock-in), and a <b>qualified second source</b> so you're not hostage to one vendor's supply, roadmap and price. Sticker we'll make competitive &mdash; but that's not where your money goes over 5 years."</div>
+  <h3>Objection handling</h3>
+  <ul>
+    <li><b>"Apstra is bloat, 99% we don't need"</b> &rarr; take it out of the quote. Junos is open (NETCONF/gNMI/YANG) &mdash; run your own Ansible/Terraform. You're buying open silicon + second source, not a controller tax.</li>
+    <li><b>"We already run Arista EOS"</b> &rarr; keep it. Qualify Juniper on two racks = leverage on every Arista renewal + supply resilience. No rip-and-replace.</li>
+    <li><b>Never lead on price</b> &mdash; win on price, lose on price. Lead on TCO (power/ops/automation).</li>
+  </ul>
+  <h3>Your narrative</h3>
+  <div class="hook">
+    "I designed <b>Clos DC fabrics at Liberty and Sky</b> &mdash; OSPF underlay, vPC, EVPN-over-MPLS. I'm updating that to the <b>VXLAN / merchant-silicon / AI</b> generation."<br><br>
+    "When MPLS came, the industry <b>trained</b> us into it. Train me into DC/AI the same way."<br><br>
+    Meta CTO decks &rarr; partnership &rarr; leading customer architecture teams = <b>the SE motion itself</b>. JNCIE-SP + CCIE = credibility most candidates can't touch.
+  </div>
+  <p class="small">Use the architect scar tissue: "I've sat in the buyer's chair for 25 years &mdash; I'll skip the vendor fluff."</p>
+</section>
+
+<footer>Built for Tue interview prep &middot; networking facts only &middot; delete after</footer>
+</main>
+</body>
+</html>
