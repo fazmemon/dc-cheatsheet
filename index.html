@@ -121,6 +121,17 @@
   </table>
   </div>
   <div class="room"><b>MPLS L3VPN map (you know this cold):</b> <span class="k">Type-5 = VPNv4 route</span> (how leaf learns) &middot; <span class="k">L3VNI = VPN label</span> (in the packet) &middot; <span class="k">egress leaf = egress PE</span>. Same machine, VXLAN wrapper instead of label stack. "Symmetric IRB" = both ends route (route-in &rarr; L3VNI &rarr; route-out).</div>
+  <h3>Symmetric vs Asymmetric IRB</h3>
+  <div class="tbl">
+  <table>
+    <tr><th></th><th>Symmetric (modern default)</th><th>Asymmetric</th></tr>
+    <tr><th>Path</th><td>bridge &rarr; <b>route into shared L3VNI</b> &rarr; fabric &rarr; <b>route out</b> &rarr; bridge. Both ends route.</td><td>ingress <b>routes AND bridges</b> (routes from source L2VNI into the <i>destination's</i> L2VNI) &rarr; fabric &rarr; egress <b>bridges only</b>.</td></tr>
+    <tr><th>Carries</th><td>one per-VRF <b>L3VNI</b> (transit)</td><td>the <b>destination L2VNI</b> (different VNI each direction = "asymmetric")</td></tr>
+    <tr><th>What every leaf needs</th><td>just the <b>L3VNI</b></td><td><span class="r">every L2VNI + ARP/MAC state</span> for every subnet it talks to</td></tr>
+    <tr><th>Scale</th><td><span class="g">scales</span> &mdash; modern default, pairs with distributed anycast GW</td><td>VNI sprawl &rarr; <span class="r">doesn't scale</span>; fine for small/few-VNI</td></tr>
+  </table>
+  </div>
+  <p class="small">One-liner: <b>asymmetric needs all VNIs on all leaves; symmetric needs only the L3VNI</b> &mdash; that's why symmetric won.</p>
   <h3>Unicast walk A&rarr;B (same subnet)</h3>
   <ol>
     <li><b>Type-2</b> pre-loaded B's MAC+IP to every leaf via BGP.</li>
