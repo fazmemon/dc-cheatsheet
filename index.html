@@ -45,6 +45,7 @@
     <a href="#evpn">EVPN/VXLAN</a>
     <a href="#ai">AI fabric</a>
     <a href="#sell">Pre-sales</a>
+    <a href="#jnpr">Juniper context</a>
   </nav>
 </header>
 <main>
@@ -177,6 +178,31 @@
     Meta CTO decks &rarr; partnership &rarr; leading customer architecture teams = <b>the SE motion itself</b>. JNCIE-SP + CCIE = credibility most candidates can't touch.
   </div>
   <p class="small">Use the architect scar tissue: "I've sat in the buyer's chair for 25 years &mdash; I'll skip the vendor fluff."</p>
+</section>
+
+<section id="jnpr">
+  <h2>7 &middot; Juniper context (don't get caught out)</h2>
+  <div class="hook"><b>Juniper is now part of HPE</b> &mdash; HPE acquired Juniper (~$14B, closed 2025) after a DOJ antitrust fight. Juniper now sits in <b>HPE Networking</b> alongside <b>Aruba</b>; Rami Rahim leads it. Know this &mdash; an interviewer may frame everything in HPE terms.</div>
+  <h3>AI-Native Networking = their flagship story</h3>
+  <p>Two different "AI" pitches &mdash; don't confuse them:</p>
+  <ul>
+    <li><b>AI FOR networking</b> = <b>Mist</b> (cloud-native AIOps) + <b>Marvis</b> (virtual network assistant). This is Juniper's headline differentiator &mdash; running the network with AI. Came from the 2019 Mist acquisition.</li>
+    <li><b>Networking FOR AI</b> = the <b>QFX / PTX</b> AI-fabric (Tomahawk/Express, RoCE, packet-spray) &mdash; the GPU back-end fabric. This is the silicon side of the sheet.</li>
+  </ul>
+  <h3>Apstra (your pre-sales lever &mdash; know what it does)</h3>
+  <p><b>Intent-based DC fabric automation</b> (2021 acquisition): you declare the fabric <i>intent</i> &rarr; it generates device configs, validates cabling, and does <b>continuous validation</b> (tells you when reality drifts from intent). Key selling point: it's <b>multivendor</b> &mdash; manages Cisco, Arista, SONiC too, not just Juniper. So "open, no lock-in" is real.</p>
+  <h3>Lossless detail (one layer under the names)</h3>
+  <ul>
+    <li><b>PFC</b> (Priority Flow Control) = per-priority PAUSE &mdash; stop a queue instead of dropping.</li>
+    <li><b>ECN</b> = mark packets at congestion instead of dropping; receiver echoes it back.</li>
+    <li><b>DCQCN</b> = the RoCEv2 congestion algorithm that combines ECN (rate-cut signal) + PFC (last-resort no-drop).</li>
+  </ul>
+  <h3>Discovery questions to ASK them (SEs lead by asking)</h3>
+  <ul>
+    <li>"What's the GPU/accelerator and the collective library &mdash; does that point us at RoCE or InfiniBand?"</li>
+    <li>"Greenfield AI build, or extending an existing EOS/Nexus estate?"</li>
+    <li>"What scale &mdash; rack, pod, or cross-DD &mdash; and what's the power/cooling envelope per rack?"</li>
+  </ul>
 </section>
 
 <footer>Built for Tue interview prep &middot; networking facts only &middot; delete after</footer>
