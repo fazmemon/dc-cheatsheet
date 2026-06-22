@@ -46,6 +46,7 @@
     <a href="#ai">AI fabric</a>
     <a href="#sell">Pre-sales</a>
     <a href="#jnpr">Juniper context</a>
+    <a href="#chassis">Chassis/line-cards/optics</a>
   </nav>
 </header>
 <main>
@@ -214,6 +215,34 @@
     <li>"Greenfield AI build, or extending an existing EOS/Nexus estate?"</li>
     <li>"What scale &mdash; rack, pod, or cross-DD &mdash; and what's the power/cooling envelope per rack?"</li>
   </ul>
+</section>
+
+<section id="chassis">
+  <h2>8 &middot; Chassis / line cards / optics (pre-sales hardware)</h2>
+  <h3>What's in a deep-buffer modular chassis</h3>
+  <ul>
+    <li><b>Line cards</b> &mdash; the ports + the forwarding ASIC (e.g. Jericho). Packets enter, get looked up, buffered in the <b>ingress VOQ</b>. The silicon lives here.</li>
+    <li><b>Fabric modules</b> (SFMs) &mdash; the internal switch carrying <b>cells</b> between line cards. Broadcom's fabric chip = <b>Ramon</b> (pairs with Jericho).</li>
+    <li><b>Supervisors / Route Engines</b> &mdash; the control plane (runs BGP/EVPN, programs the line cards). Redundant pair.</li>
+    <li>Power supplies, fans.</li>
+  </ul>
+  <h3>Silicon generation maps to the LINE CARD</h3>
+  <p>Each line card is built around <b>one ASIC generation</b> (Jericho2 &rarr; J2c+ &rarr; J3). The chassis is a <b>generation-agnostic backplane</b> &mdash; you populate it with whatever-gen line cards you buy. "Arista 7800<b>R3</b> vs <b>R4</b>" = same chassis, different-gen line cards.</p>
+  <h3>Fabric data path</h3>
+  <p>ingress line card: lookup &rarr; <b>ingress VOQ</b> &rarr; segment into <b>cells</b> &rarr; spray across <b>fabric modules</b> &rarr; egress line card <b>reassembles</b>. More fabric modules = more internal bandwidth + redundancy.</p>
+  <div class="hook"><b>Ramon is Broadcom-only</b> (goes with Jericho). In-house vendors build their own fabric chips: <b>Juniper</b> (Q5/Express), <b>Cisco Silicon One</b>, <b>Nokia FP5</b>. Concept is universal (line-card ASIC + separate fabric ASIC); the chip is merchant-vs-in-house.</div>
+  <h3>Upgrade to 800G without a forklift</h3>
+  <p>Swap the <b>line cards</b> for newer-gen silicon with 800G ports (e.g. 100G Jericho2 cards &rarr; 800G Jericho3 cards). Likely add/upgrade <b>fabric modules</b> too so the fabric can feed them. <b>Chassis, backplane, power frame persist</b> &mdash; that's the whole point of modular: buy the chassis once, refresh line cards over a decade. (Fixed shallow box = single die, 1RU, no line cards/fabric &mdash; you replace the whole box.)</p>
+  <h3>Optics (big AI cost + power lever)</h3>
+  <ul>
+    <li><b>Form factors</b>: SFP28 (25G) &rarr; QSFP28 (100G) &rarr; <b>QSFP-DD / OSFP</b> (400/800G = the AI optics).</li>
+    <li><b>LPO</b> (Linear Pluggable Optics) &mdash; strips the DSP, ~50-60% less power. Arista 7060XE7 headline; AI cost lever.</li>
+    <li><b>CPO</b> (co-packaged optics) &mdash; optics next to the ASIC; the next power step at huge scale.</li>
+    <li><b>DAC</b> (direct-attach copper) &mdash; passive, in-rack GPU-to-leaf, cheapest + lowest power. <b>AOC</b> = active optical cable.</li>
+    <li><b>Grey</b> optics (single wavelength) = inside the DC, short reach, cheap. <b>Coloured / DWDM</b> = <b>DCI</b> over distance (multiplex onto scarce fibre) &mdash; lives at the deep-buffer DCI edge.</li>
+  </ul>
+  <h3>Cooling</h3>
+  <p>Air vs <b>liquid</b>. AI boxes (Arista 7060XE7, Juniper QFX5250) are liquid-cooled for power/thermal density. <b>Optics + power + cooling = the AI-fabric cost conversation</b> = where pre-sales money actually is.</p>
 </section>
 
 <footer>Built for Tue interview prep &middot; networking facts only &middot; delete after</footer>
