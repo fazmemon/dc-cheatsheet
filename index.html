@@ -261,7 +261,7 @@
     <li><b>Grey</b> optics (single wavelength) = inside the DC, short reach, cheap. <b>Coloured / DWDM</b> = <b>DCI</b> over distance (multiplex onto scarce fibre) &mdash; lives at the deep-buffer DCI edge.</li>
   </ul>
   <h3>Cooling</h3>
-  <p>Air vs <b>liquid</b>. AI boxes (Arista 7060XE7, Juniper QFX5250) are liquid-cooled for power/thermal density. <b>Optics + power + cooling = the AI-fabric cost conversation</b> = where pre-sales money actually is.</p>
+  <p>Air vs <b>liquid</b>. AI boxes (Arista 7060XE7, Juniper QFX5250) are liquid-cooled. <b>Why:</b> chip power (TH6 at 100T+) + dense 800G optics + GPUs pack <b>too many watts into too little space</b> &mdash; air physically can't move the heat away fast enough. Liquid carries far more heat per volume (direct-to-chip cold plate / immersion). <b>Power density outran air.</b> Net: <b>optics + power + cooling = the AI-fabric cost conversation</b> = where pre-sales money actually is.</p>
   <h3>Oversubscription</h3>
   <p>Set at the <b>leaf uplink:downlink ratio</b> (sum of fabric-facing vs host-facing bandwidth). <b>1:1 (non-blocking)</b> for AI / trading; up to <b>3:1</b> for general compute. The <b>spine is non-blocking by construction</b> &mdash; oversubscription is a leaf decision, not a spine one. (Weak answer says "the spine" &mdash; wrong.)</p>
 </section>
