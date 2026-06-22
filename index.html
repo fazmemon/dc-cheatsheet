@@ -243,6 +243,8 @@
   </ul>
   <h3>Cooling</h3>
   <p>Air vs <b>liquid</b>. AI boxes (Arista 7060XE7, Juniper QFX5250) are liquid-cooled for power/thermal density. <b>Optics + power + cooling = the AI-fabric cost conversation</b> = where pre-sales money actually is.</p>
+  <h3>Oversubscription</h3>
+  <p>Set at the <b>leaf uplink:downlink ratio</b> (sum of fabric-facing vs host-facing bandwidth). <b>1:1 (non-blocking)</b> for AI / trading; up to <b>3:1</b> for general compute. The <b>spine is non-blocking by construction</b> &mdash; oversubscription is a leaf decision, not a spine one. (Weak answer says "the spine" &mdash; wrong.)</p>
 </section>
 
 <footer>Built for Tue interview prep &middot; networking facts only &middot; delete after</footer>
