@@ -80,7 +80,16 @@
 
 <section id="evo">
   <h2>2 &middot; Card / silicon evolution</h2>
-  <div class="hook"><b>The law:</b> each generation <b>~doubles bandwidth</b>, driven by <b>SerDes speed doubling</b> &mdash; <u>per-lane speed</u>, not more lanes. <code>NRZ = 1 bit/symbol &rarr; PAM4 = 2 bits/symbol</code> + higher baud. Ladder: <span class="k">25G &rarr; 50G &rarr; 100G &rarr; 200G per lane</span>. "Which line card" = which silicon gen + port config.</div>
+  <div class="hook"><b>The law:</b> each generation <b>~doubles bandwidth</b> via a MIX of <b>faster lanes</b> AND <b>more lanes</b>. "Which line card" = which silicon gen + port config.</div>
+  <h3>The 4 levers (start at the lane, end at the chip)</h3>
+  <p>A <b>lane</b> = one SerDes; its speed = <b>bits/symbol &times; baud</b>. A <b>port</b> = several lanes bonded. The <b>chip</b> = all lanes across all ports.</p>
+  <ul>
+    <li><b>1. bits/symbol</b> &mdash; NRZ (1 bit) &rarr; <b>PAM4 (2 bits)</b>.</li>
+    <li><b>2. baud rate</b> climbs each gen.<br><span class="small">1+2 = per-lane ladder <b>25 &rarr; 50 &rarr; 100 &rarr; 200G per lane</b>.</span></li>
+    <li><b>3. lanes per port</b> (bonded) &mdash; e.g. 800G port = 8&times;100G or 4&times;200G.</li>
+    <li><b>4. more total lanes / higher radix</b> on the die.</li>
+  </ul>
+  <p class="small">Faster lanes (1+2) + more lanes (3+4) together = the doubling. The lane-<b>count</b> half (3+4) is the one people forget.</p>
   <div class="grid2">
     <div><h3>Tomahawk (shallow)</h3>TH3 &rarr; TH4 25.6T &rarr; TH5 51.2T &rarr; <b>TH6 102.4T</b><br><span class="small">radix / bandwidth race</span></div>
     <div><h3>Jericho (deep)</h3>J2 &rarr; J2c+ &rarr; J3-AI &rarr; <b>J4 ~51.2T</b><br><span class="small">J3-AI = perfect-LB/congestion-free for GPU; J4 = scale across DCs</span></div>
