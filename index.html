@@ -164,6 +164,7 @@
   <h3>Why ECMP breaks for all-reduce</h3>
   <p>All-reduce = a few huge <b>elephant</b> flows. ECMP hashes <b>per-flow</b> &rarr; pins each to one path &rarr; elephants collide while links idle. Barrier-synced &rarr; slowest path stalls every GPU.</p>
   <div class="room"><b>Fix = packet spraying / adaptive routing</b> (spread one flow across all paths: Broadcom DLB, Spectrum-X adaptive, UEC). Safe ONLY on <b>lossless + reorder-tolerant</b>: <span class="k">RoCEv2 over PFC + ECN + DCQCN</span>. NIC reassembles; fabric must not drop. Plain TCP = disaster.</div>
+  <div class="hook"><b>"AI has incast &mdash; why shallow buffers, not deep?"</b> (likely probe) Because AI solves congestion at the <b>transport</b> with <b>lossless RoCE (PFC/ECN/DCQCN)</b>, not in the box. Deep buffers add the latency AI hates &mdash; so AI is deliberately <b>shallow + lossless</b>. Deep buffer is for traffic you <i>can't</i> make lossless: WAN, DCI, peering, mixed enterprise (big RTT, speed mismatch, classic TCP).</div>
   <h3>Non-Clos topologies (sold into AI/HPC)</h3>
   <ul>
     <li><b>Rail-optimized Clos</b> &mdash; each GPU NIC on its own rail/leaf; same-rank GPUs = 1 hop (NVIDIA default).</li>
