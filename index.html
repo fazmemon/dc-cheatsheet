@@ -173,6 +173,15 @@
     <li><b>OCS</b> &mdash; optical circuit switch rewires topology per job (Google Jupiter).</li>
   </ul>
   <p class="small">Every non-Clos topology kills simple ECMP &rarr; all need adaptive routing + lossless. <b>UEC</b> = the open standard replacing per-flow ECMP + IB lock-in.</p>
+  <h3>Juniper's AI scale-out answer (don't fall for "Q5")</h3>
+  <div class="hook"><b>Q5 is NOT the AI answer.</b> Q5 (QFX10000) is the older deep-buffer DC <i>switch</i>. For the AI back-end fabric Juniper does what everyone does &mdash; <b>buys Broadcom Tomahawk 5/6</b> (QFX5240 / QFX5250). <i>(confirm current model names &mdash; AI naming moves fast.)</i></div>
+  <ul>
+    <li><b>Why no in-house Jericho3-AI clone:</b> the AI fabric is built <b>shallow + lossless</b> (Tomahawk + RoCE/PFC/ECN), not deep-buffer. Jericho3-AI is Broadcom's <i>deep-buffer</i> AI angle; most AI fabrics go shallow TH + lossless instead.</li>
+    <li><b>AI leaf/spine</b> &rarr; Broadcom TH5/TH6 (QFX5240/5250) &mdash; merchant, same as Arista.</li>
+    <li><b>Scale across AI data centres</b> (the J4 role) &rarr; in-house <b>Express (PTX)</b>.</li>
+    <li><b>Differentiation = Apstra + AI-Native (Mist/Marvis) + open Ethernet/UEC</b> &mdash; NOT the chip.</li>
+  </ul>
+  <div class="room"><b>Room line:</b> "For the AI fabric the silicon's merchant Tomahawk &mdash; same as Arista &mdash; so we don't compete on the chip; we compete on <b>automation, openness and the operational model</b>." Honest + strong.</div>
 </section>
 
 <section id="sell">
