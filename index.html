@@ -90,6 +90,7 @@
     <li><b>4. more total lanes / higher radix</b> on the die.</li>
   </ul>
   <p class="small">Faster lanes (1+2) + more lanes (3+4) together = the doubling. The lane-<b>count</b> half (3+4) is the one people forget.</p>
+  <div class="hook"><b>Simpler memory hook &mdash; 3 knobs:</b> <code>Bandwidth = bits &times; baud &times; lanes</code>. <b>bits</b> (PAM4) &middot; <b>baud</b> (faster symbols) &middot; <b>lanes</b> (how many &mdash; bond more per port + more on the die). You always remember bits + baud; the one you drop is <b>LANES</b>.</div>
   <div class="grid2">
     <div><h3>Tomahawk (shallow)</h3>TH3 &rarr; TH4 25.6T &rarr; TH5 51.2T &rarr; <b>TH6 102.4T</b><br><span class="small">radix / bandwidth race</span></div>
     <div><h3>Jericho (deep)</h3>J2 &rarr; J2c+ &rarr; J3-AI &rarr; <b>J4 ~51.2T</b><br><span class="small">J3-AI = perfect-LB/congestion-free for GPU; J4 = scale across DCs</span></div>
