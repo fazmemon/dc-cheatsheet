@@ -134,6 +134,7 @@
   </table>
   </div>
   <p class="small"><b>Through-line:</b> active/active &rarr; scale &rarr; L2-back-as-overlay &rarr; control plane. <b>Fat-tree = the L3-Clos topology</b> (non-blocking Clos), at the underlay; VXLAN/EVPN ride on top. <b>ESI-LAG = vPC done fabric-wide.</b> Trap: L3-Clos and VXLAN aren't opposite moves &mdash; L3 left L2 for scale, VXLAN got L2 back without losing it.</p>
+  <div class="hook"><b>Collapsed spine</b> &mdash; the <i>small-DC</i> deployment of EVPN-VXLAN, <b>not a new step</b>: delete the leaf row &mdash; the <b>spine pair itself is leaf + spine + VTEP</b> and servers plug straight into it. Dual-homed with <b>ESI-LAG</b>, it's the standards-based <b>EVPN successor to the vPC pair</b> (two boxes run the whole site, BGP control plane instead of vPC). Big DC &rarr; full leaf-spine; small DC &rarr; collapse to the pair. <b>Trade-off:</b> capped by the two boxes' port count &mdash; outgrow it &rarr; break out to a real leaf-spine. ("Border-collapsed" = same move at the edge: spine also does the L3 gateway / external handoff, no separate border-leaf.)</div>
   <h3>The 2&times;2 &mdash; the data-plane spine</h3>
   <div class="tbl">
   <table>
