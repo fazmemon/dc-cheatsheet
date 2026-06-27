@@ -123,6 +123,17 @@
 
 <section id="evpn">
   <h2>4 &middot; EVPN / VXLAN</h2>
+  <h3>How we got here &mdash; the topology evolution (each step fixes the last)</h3>
+  <div class="tbl">
+  <table>
+    <tr><th>Step</th><th>What it gave</th><th>What forced the next</th></tr>
+    <tr><td><b>vPC / MLAG</b></td><td>active/active dual-homing, no STP block</td><td>2-switch only; big L2 flooding/blast radius</td></tr>
+    <tr><td><b>L3 Clos</b> <span class="small">(= fat-tree)</span></td><td>scale, ECMP, no STP</td><td>routes to leaf &rarr; <b>lost L2 stretch</b> (VM mobility, clustering)</td></tr>
+    <tr><td><b>VXLAN overlay</b></td><td>L2 back <i>on</i> the L3 fabric; 16M VNIs vs 4K VLANs</td><td>1st gen = flood-and-learn; no control plane</td></tr>
+    <tr><td><b>EVPN-VXLAN</b></td><td>BGP advertises MAC/IP &rarr; ARP suppression, mobility, IRB, ESI</td><td>(current)</td></tr>
+  </table>
+  </div>
+  <p class="small"><b>Through-line:</b> active/active &rarr; scale &rarr; L2-back-as-overlay &rarr; control plane. <b>Fat-tree = the L3-Clos topology</b> (non-blocking Clos), at the underlay; VXLAN/EVPN ride on top. <b>ESI-LAG = vPC done fabric-wide.</b> Trap: L3-Clos and VXLAN aren't opposite moves &mdash; L3 left L2 for scale, VXLAN got L2 back without losing it.</p>
   <h3>The 2&times;2 &mdash; the data-plane spine</h3>
   <div class="tbl">
   <table>
@@ -183,6 +194,19 @@
     <li><b>OCS</b> &mdash; optical circuit switch rewires topology per job (Google Jupiter).</li>
   </ul>
   <p class="small">Every non-Clos topology kills simple ECMP &rarr; all need adaptive routing + lossless. <b>UEC</b> = the open standard replacing per-flow ECMP + IB lock-in.</p>
+  <p class="small"><b>Fat-tree</b> = the non-blocking (full-bisection) <b>Clos</b> these sit on (HPC name for spine-leaf; the underlay VXLAN rides on). A <b>rail-optimized fabric is a fat-tree</b> tuned to GPU ranks.</p>
+  <h3>Sizing &mdash; how many GPUs fit (rail-optimized, 1:1, 8-GPU servers)</h3>
+  <div class="hook"><b>One division does it:</b> <code>GPUs/leaf = 12.8T &divide; GPU-port-speed</code> &rarr; A100@200G = 64, H100@400G = 32. &times; <b>8 leaves</b> (8 rails) = per stripe. <code>Spines = 256 leaf-uplinks &divide; spine-ports</code>.</div>
+  <div class="tbl">
+  <table>
+    <tr><th></th><th>A100 (200G port)</th><th>H100 (400G port)</th></tr>
+    <tr><th>GPUs / leaf <span class="small">(12.8T &divide; port)</span></th><td><span class="k">64</span></td><td><span class="k">32</span></td></tr>
+    <tr><th>GPUs / stripe <span class="small">(&times; 8 leaves)</span></th><td><b>512</b></td><td><b>256</b></td></tr>
+    <tr><th>Servers / stripe <span class="small">(&divide; 8 GPU/srv)</span></th><td>64</td><td>32</td></tr>
+    <tr><th>Spines <span class="small">(256 uplinks &divide; ports)</span></th><td colspan="2"><b>4&times; QFX5230-64CD</b> (64p) &nbsp;or&nbsp; <b>2&times; PTX10008</b> (288p, room to grow)</td></tr>
+  </table>
+  </div>
+  <p class="small">Leaf = QFX5230-64CD: 64&times;400G = 25.6T &rarr; 32 down + 32 up = <b>12.8T each way</b> &rarr; that's the &divide; that gives 64/32. Intra-server GPU&harr;GPU = NVLink (off-fabric).</p>
   <h3>Juniper's AI scale-out answer (don't fall for "Q5")</h3>
   <div class="hook"><b>Q5 is NOT the AI answer.</b> Q5 (QFX10000) is the older deep-buffer DC <i>switch</i>. For the AI back-end fabric Juniper does what everyone does &mdash; <b>buys Broadcom Tomahawk 5/6</b> (QFX5240 / QFX5250). <i>(confirm current model names &mdash; AI naming moves fast.)</i></div>
   <ul>
