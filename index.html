@@ -56,8 +56,8 @@
   <div class="tbl">
   <table>
     <tr><th>Role / buffer</th><th>Broadcom</th><th>Arista</th><th>Cisco</th><th>Juniper</th><th>Nokia</th></tr>
-    <tr><td><b>Deep</b><br>VOQ+HBM<br>DCI / AI scale</td><td>Jericho 2/3/4</td><td><span class="k">7280R / 7500R / 7800R</span></td><td>NCS 5500/5700 (Jericho); 8000 = Silicon One</td><td><span class="k">QFX10000 = Q5</span>; PTX = Express; MX = Trio</td><td>7250 IXR (Jericho); 7750 SR = FP5</td></tr>
-    <tr><td><b>Shallow</b><br>on-chip<br>leaf / spine</td><td>Trident / Tomahawk</td><td>7050X / 7060X (+7300 chassis)</td><td>Nexus 9300/9500 = Cloud Scale</td><td>QFX5xxx</td><td>7220 IXR</td></tr>
+    <tr><td><b>Deep</b><br>VOQ+HBM<br>DCI / AI scale</td><td>Jericho 2/3/4</td><td><span class="k">7280R / 7500R / 7800R</span></td><td>NCS 5500/5700 (Jericho); 8000 + AI Nexus 9800 = Silicon One Q200</td><td><span class="k">QFX10000 = Q5</span>; PTX = Express; MX = Trio</td><td>7250 IXR (Jericho); 7750 SR = FP5</td></tr>
+    <tr><td><b>Shallow</b><br>on-chip<br>leaf / spine</td><td>Trident / Tomahawk</td><td>7050X / 7060X (+7300 chassis)</td><td>Nexus 9300/9500 = Cloud Scale (classic)</td><td>QFX5xxx</td><td>7220 IXR</td></tr>
     <tr><td><b>L1</b><br>ultra-low-latency</td><td>&mdash;</td><td>7130 (Metamako)</td><td>Nexus 3550 (Exablaze)</td><td>&mdash;</td><td>&mdash;</td></tr>
     <tr><td><b>In-house?</b></td><td><i>merchant</i></td><td><span class="r">none &mdash; all Broadcom</span></td><td>Cloud Scale + Silicon One (+ buys Jericho)</td><td><span class="g">Q5 / Express / Trio</span></td><td>FP5 (deep only)</td></tr>
   </table>
@@ -73,7 +73,7 @@
     <b>Arista "R" = deep/Jericho</b> &rarr; 7280R / 7500R / 7800R (28-50-80). No "R" = shallow.<br>
     <b>Juniper by where it lives:</b> <span class="k">QFX = DC</span> &middot; <span class="k">PTX = core</span> &middot; <span class="k">MX = edge</span>. Deep DC = QFX10000 = Q5.<br>
     <b>In-house lives only where the money is</b> (deep/routing/AI). Shallow leaf = Broadcom commodity. Only Cisco bothers with in-house shallow (Cloud Scale).<br>
-    <b>Cisco runs 3 silicons:</b> Cloud Scale (shallow, own) + Silicon One (deep, own) + Broadcom Jericho (NCS).
+    <b>Cisco runs 3 silicons:</b> Cloud Scale (shallow, own) + Silicon One (deep, own) + Broadcom Jericho (NCS).<br><b>Trap:</b> classic Nexus 9300/9500 = Cloud Scale, but the <b>AI Nexus 9800 = Silicon One Q200</b> (deep, VOQ + fabric modules) &mdash; don't assume "Nexus = Cloud Scale".
   </div>
   <p class="small">Deep in a low-latency leaf &rarr; cell+credit+HBM tax kills latency. Shallow in DCI/incast &rarr; can't absorb burst: 50ms&times;100G &asymp; 625MB needed vs ~165MB on-chip &rarr; tail-drop.</p>
 </section>
