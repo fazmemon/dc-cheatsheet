@@ -47,6 +47,7 @@
     <a href="#sell">Pre-sales</a>
     <a href="#jnpr">Juniper context</a>
     <a href="#chassis">Chassis/line-cards/optics</a>
+    <a href="#virt">Virtualization</a>
   </nav>
 </header>
 <main>
@@ -301,6 +302,29 @@
   <p>Air vs <b>liquid</b>. AI boxes (Arista 7060XE7, Juniper QFX5250) are liquid-cooled. <b>Why:</b> chip power (TH6 at 100T+) + dense 800G optics + GPUs pack <b>too many watts into too little space</b> &mdash; air physically can't move the heat away fast enough. Liquid carries far more heat per volume (direct-to-chip cold plate / immersion). <b>Power density outran air.</b> Net: <b>optics + power + cooling = the AI-fabric cost conversation</b> = where pre-sales money actually is.</p>
   <h3>Oversubscription</h3>
   <p>Set at the <b>leaf uplink:downlink ratio</b> (sum of fabric-facing vs host-facing bandwidth). <b>1:1 (non-blocking)</b> for AI / trading; up to <b>3:1</b> for general compute. The <b>spine is non-blocking by construction</b> &mdash; oversubscription is a leaf decision, not a spine one. (Weak answer says "the spine" &mdash; wrong.)</p>
+</section>
+
+<section id="virt">
+  <h2>9 &middot; Virtualization &amp; containers (network view)</h2>
+  <h3>Three layers</h3>
+  <div class="tbl">
+  <table>
+    <tr><th>Layer</th><th>What it virtualizes</th><th>Network</th></tr>
+    <tr><td><b>VM</b> (VMware/ESXi)</td><td>the <b>hardware</b> &mdash; a full guest OS each, heavy</td><td>vSwitch / <b>NSX</b> overlay</td></tr>
+    <tr><td><b>Container</b> (Docker)</td><td>the <b>OS</b> &mdash; shares the host kernel, isolated process, light/dense</td><td>veth+bridge / CNI</td></tr>
+    <tr><td><b>Kubernetes</b></td><td>nothing &mdash; <b>orchestrates</b> containers across a cluster (schedule/scale/heal)</td><td>CNI + Services + NetworkPolicy</td></tr>
+  </table>
+  </div>
+  <p class="small">k8s runtime = <b>containerd</b> (Docker shim dropped at v1.24); Docker just builds the OCI image. "k8s manages Docker" = stale.</p>
+  <h3>The networking (why it's yours, not devops)</h3>
+  <ul>
+    <li><b>K8s CNI</b> &mdash; every pod gets an IP; the CNI plugin does pod-to-pod (Calico/Cilium, usually a Geneve/VXLAN overlay); <b>Services</b>+kube-proxy load-balance across replicas; <b>NetworkPolicy</b> is the distributed firewall. An overlay on your EVPN/VXLAN underlay.</li>
+    <li><b>VMware NSX</b> &mdash; Geneve overlay + micro-segmentation (distributed firewall in the hypervisor).</li>
+    <li><b>Service chaining (SFC)</b> &mdash; stitch network functions into a path: <b>VNFs</b> (VMs) / <b>CNFs</b> (containers).</li>
+    <li><b>Juniper hook</b> &mdash; <b>Contrail / CN2</b> = a k8s CNI + SDN controller (multivendor). Apstra automates the fabric; Contrail does the workload overlay/policy.</li>
+    <li><b>AI/GPU</b> &mdash; GPU clusters run on k8s (NVIDIA GPU Operator); RoCE NICs reach pods via <b>SR-IOV + Multus</b> + GPUDirect RDMA (&sect;5 fabric meeting containers).</li>
+  </ul>
+  <div class="hook"><b>The one-liner:</b> k8s and NSX build <b>another overlay on top of your fabric overlay</b> &mdash; overlay on overlay. Your EVPN/VXLAN is the underlay to their CNI/NSX.</div>
 </section>
 
 <footer>Built for Tue interview prep &middot; networking facts only &middot; delete after</footer>
