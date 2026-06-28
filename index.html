@@ -186,6 +186,9 @@
   <h3>Why ECMP breaks for all-reduce</h3>
   <p>All-reduce = a few huge <b>elephant</b> flows. ECMP hashes <b>per-flow</b> &rarr; pins each to one path &rarr; elephants collide while links idle. Barrier-synced &rarr; slowest path stalls every GPU.</p>
   <div class="room"><b>Fix = packet spraying / adaptive routing</b> (spread one flow across all paths: Broadcom DLB, Spectrum-X adaptive, UEC). Safe ONLY on <b>lossless + reorder-tolerant</b>: <span class="k">RoCEv2 over PFC + ECN + DCQCN</span>. NIC reassembles; fabric must not drop. Plain TCP = disaster.</div>
+  <div class="hook"><b>DCQCN &mdash; who actually slows down (plain words):</b><br>
+  A congested switch sets the <b>ECN</b> mark on the packet. The packet carries that mark to the <b>receiver</b>. The receiver sends a <b>CNP</b> (Congestion Notification Packet) back to the <b>sender</b>. The <b>sender</b> cuts its send rate.<br>
+  So the <b>sender throttles, not the receiver</b>. <b>PFC</b> is the last resort: when a queue is nearly full it sends a per-priority PAUSE to the previous hop, so the hop pauses instead of dropping.</div>
   <div class="hook"><b>"AI has incast &mdash; why shallow buffers, not deep?"</b> (likely probe) Because AI solves congestion at the <b>transport</b> with <b>lossless RoCE (PFC/ECN/DCQCN)</b>, not in the box. Deep buffers add the latency AI hates &mdash; so AI is deliberately <b>shallow + lossless</b>. Deep buffer is for traffic you <i>can't</i> make lossless: WAN, DCI, peering, mixed enterprise (big RTT, speed mismatch, classic TCP).</div>
   <h3>Non-Clos topologies (sold into AI/HPC)</h3>
   <ul>
@@ -196,6 +199,14 @@
   </ul>
   <p class="small">Every non-Clos topology kills simple ECMP &rarr; all need adaptive routing + lossless. <b>UEC</b> = the open standard replacing per-flow ECMP + IB lock-in.</p>
   <p class="small"><b>Fat-tree</b> = the non-blocking (full-bisection) <b>Clos</b> these sit on (HPC name for spine-leaf; the underlay VXLAN rides on). A <b>rail-optimized fabric is a fat-tree</b> tuned to GPU ranks.</p>
+  <h3>What a "stripe" is &mdash; the building block</h3>
+  <p>A <b>stripe</b> is one rail-optimized block: 8 leaves (one per rail) plus all the GPUs hanging off them. It's the repeatable unit you tile to grow the fabric. It is NOT "rail vs Clos" &mdash; a stripe IS a slice of the Clos, aligned to the 8 rails.</p>
+  <div class="hook"><b>The ladder (plain words):</b><br>
+  <b>GPU</b> = one accelerator, one NIC, one rail (an H100 NIC is 400G).<br>
+  <b>Server</b> = 8 GPUs, 8 NICs. Inside the server the GPUs talk over NVLink, off the fabric.<br>
+  <b>Leaf</b> = one switch per rail. An H100 leaf holds 32 GPUs (12.8T of host-facing capacity divided by 400G).<br>
+  <b>Stripe</b> = 8 leaves, so 256 H100 = 32 servers. (A100 at 200G is 64 per leaf, so 512 per stripe = 64 servers.)<br>
+  <b>Cluster</b> = many stripes joined through the spine tier.</div>
   <h3>Sizing &mdash; how many GPUs fit (rail-optimized, 1:1, 8-GPU servers)</h3>
   <div class="hook"><b>One division does it:</b> <code>GPUs/leaf = 12.8T &divide; GPU-port-speed</code> &rarr; A100@200G = 64, H100@400G = 32. &times; <b>8 leaves</b> (8 rails) = per stripe. <code>Spines = 256 leaf-uplinks &divide; spine-ports</code>.</div>
   <div class="tbl">
